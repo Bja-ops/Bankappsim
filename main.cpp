@@ -18,7 +18,7 @@ User user;
 
 void saveUserCredentials(const string &login, const string &password, const string &role)
 {
-    ofstream file("users.txt", ios::app);
+    ofstream file("users.txt", ios::app | ios::in);
     if (file.is_open())
     {
         file << login << ";" << password << ";" << role << endl;
