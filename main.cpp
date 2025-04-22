@@ -1,7 +1,8 @@
-#include <iostream>
+    #include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <ctime>
+#include <vector>
 using namespace std;
 
 struct User
@@ -12,6 +13,21 @@ struct User
 
 User user;
 
+
+void saveUserCredentials(const string &login, const string &password, string role)
+{
+    ofstream file("users.txt", ios::app);
+    if (file.is_open())
+    {
+        file << login << ";" << password << endl;
+        file.close();
+    }
+    else
+    {
+        cout << "Nie mozna otworzyc pliku users.txt!" << endl;
+    }
+}
+
 void loginToFile(string login)
 {
     fstream file;
@@ -21,6 +37,7 @@ void loginToFile(string login)
         file << login << endl;
         file.close();
     }
+    cout << "Login zapisany do pliku logins.txt\n";
 }
 
 void passToFile(string pass)
@@ -35,130 +52,259 @@ void passToFile(string pass)
 }
 
 
-void dataToFile(string name, string surname, string mothername, string mothersurname, string fathername, string fathersurname, string family_name, string citizenship, string ID_NUMBER, string PESEL_NUMBER, string date_of_birth, string phone_number)
+void dataToFile(const User &user)
 {
-    printf("Prosze podac dane niezbedne do zalozenia konta:\n");
-    printf("Imie:\n");
-    cin >> name;
-    printf("Nazwisko:\n");
-    cin >> surname;
-    cin.ignore();
-    printf("Nazwisko rodowe:\n");
-    getline(cin, family_name);
-    printf("Imie matki:\n");
-    cin >> mothername;
-    printf("Nazwisko matki:\n");
-    cin >> mothersurname;
-    printf("Imie ojca:\n");
-    cin >> fathername;
-    printf("Nazwisko ojca:\n");
-    cin >> fathersurname;
-    cin.ignore();
-    printf("Narodowosc:\n");
-    getline(cin, citizenship);
-    printf("Nr. dowodu:\n");
-    cin >> ID_NUMBER;
-    printf("Numer PESEL:\n");
-    cin >> PESEL_NUMBER;
-    cin.ignore();
-    printf("Data urodzenia:\n");
-    while(true)
+    ofstream file("data.txt", ios::app);
+    if (file.is_open())
     {
-        cout << "Data w formacie: (dd.mm.rrrr)" << endl;
-        getline(cin, date_of_birth);
-        if(date_of_birth.length() == 10 && date_of_birth[2] == '.' && date_of_birth[5] == '.')
-        break;
+        file << "Imie: " << user.name << endl;
+        file << "Nazwisko: " << user.surname << endl;
+        file << "Nazwisko rodowe: " << user.family_name << endl;
+        file << "Imie matki: " << user.mothers_name << endl;
+        file << "Nazwisko matki: " << user.mothers_surname << endl;
+        file << "Imie ojca: " << user.fathers_name << endl;
+        file << "Nazwisko ojca: " << user.fathers_surname << endl;
+        file << "Narodowosc: " << user.citizenship << endl;
+        file << "Nr. dowodu: " << user.ID_NUMBER << endl;
+        file << "PESEL: " << user.PESEL_NUMBER << endl;
+        file << "Data urodzenia: " << user.date_of_birth << endl;
+        file << "Nr. telefonu: " << user.phone_number << endl;
+        file << endl;
+        file.close();
+    }
+    else
+    {
+        cout << "Nie mozna otworzyc pliku data.txt!\n";
+    }
+}
+
+void fillUserData(User &user)
+{
+    cout << "Prosze podac dane niezbedne do zalozenia konta:\n";
+
+    cout << "Imie: ";
+    cin >> user.name;
+
+    cout << "Nazwisko: ";
+    cin >> user.surname;
+    cin.ignore();
+
+    cout << "Nazwisko rodowe: ";
+    getline(cin, user.family_name);
+
+    cout << "Imie matki: ";
+    cin >> user.mothers_name;
+
+    cout << "Nazwisko matki: ";
+    cin >> user.mothers_surname;
+
+    cout << "Imie ojca: ";
+    cin >> user.fathers_name;
+
+    cout << "Nazwisko ojca: ";
+    cin >> user.fathers_surname;
+    cin.ignore();
+
+    cout << "Narodowosc: ";
+    getline(cin, user.citizenship);
+
+    cout << "Nr. dowodu: ";
+    cin >> user.ID_NUMBER;
+
+    cout << "Numer PESEL: ";
+    cin >> user.PESEL_NUMBER;
+    cin.ignore();
+
+    while (true)
+    {
+        cout << "Data urodzenia (dd.mm.rrrr): ";
+        getline(cin, user.date_of_birth);
+        if (user.date_of_birth.length() == 10 && user.date_of_birth[2] == '.' && user.date_of_birth[5] == '.')
+            break;
         else
-        cout << "Nieprawidłowy format. Prosze sprobowac ponownie.\n";
+            cout << "Nieprawidlowy format. Prosze sprobowac ponownie.\n";
     }
-    printf("Nr. telefonu:\n");
-    getline(cin, phone_number);
 
-    fstream file;
-    if(file.is_open())
-    {
-    file.open("data.txt", ios::in | ios::app);
-    file << "Imie: " << name << endl;
-    file << "Nazwisko: " << surname << endl;
-    file << "Nazwisko rodowe: " << family_name << endl;
-    file << "Imie matki: " << mothername << endl;
-    file << "Naziwsko matki: " << mothersurname << endl;
-    file << "Imie ojca: " << fathername << endl;
-    file << "Nazwisko ojca: " << fathersurname << endl;
-    file << "Narodowosc: " << citizenship << endl;
-    file << "Nr. dowodu: " << ID_NUMBER << endl;
-    file << "PESEL: " << PESEL_NUMBER << endl;
-    file << "Data urodzenia: " << date_of_birth << endl;
-    file << "Nr. telefonu: " << phone_number << endl;
-    file.close();
-    }
+    cout << "Nr. telefonu: ";
+    getline(cin, user.phone_number);
 }
 
-
-void registerUser(void (*dataToFile)(string, string, string, string, string, string, string, string, string, string, string, string))
+void registerUser()
 {
-    string name, surname, family_name, mothername, mothersurname, fathername, fathersurname, citizenship, ID_NUMBER, PESEL_NUMBER, date_of_birth, phone_number;
-    dataToFile(name, surname, family_name, mothername, mothersurname, fathername, fathersurname, citizenship, ID_NUMBER, PESEL_NUMBER, date_of_birth, phone_number);
+    User newUser;
+    fillUserData(newUser);
+    dataToFile(newUser);
+
+    string login, password, role;
+    cout << "Podaj login: ";
+    getline(cin, login);
+    cout << "Podaj haslo: ";
+    getline(cin, password);
+
+    cout << "Wybierz rolę (admin/user): ";
+    getline(cin, role);
+
+    while (role != "admin" && role != "user")
+    {
+        cout << "Nieprawidłowa rola. Wpisz 'admin' lub 'user': ";
+        getline(cin, role);
+    }
+
+    saveUserCredentials(login, password, role);
 }
 
-void LoginUser(string loginInput, string passInput)
+bool isAccountBlocked(const string &login)
 {
-    cout << "Give login: " << endl;
-    getline(cin,loginInput);
-    ifstream file("logins.txt");
-    if(!file.is_open())
+    ifstream file("blocked.txt");
+    if (!file.is_open()) return false;
+
+    string blockedLogin;
+    while (getline(file, blockedLogin))
     {
-        cout << "Nie otworzono pliku logins.txt! " << endl;
-        return;
-    }
-    string loginFromFile;
-    bool found = false;
-    while(getline(file, loginFromFile))
-    {
-        if(loginFromFile == loginInput)
+        if (blockedLogin == login)
         {
-            found = true;
-            break;
+            return true;
         }
     }
-    file.close();
-    if(found)
+    return false;
+}
+
+void blockAccount(const string &login)
+{
+    ofstream file("blocked.txt", ios::app);
+    if (file.is_open())
     {
-        cout << "Login successful! " << endl;
+        file << login << endl;
+        file.close();
+    }
+}
+
+void LoginUser()
+{
+    string loginInput, passInput;
+    cout << "Podaj login: ";
+    getline(cin, loginInput);
+
+    if (isAccountBlocked(loginInput))
+    {
+        cout << "To konto jest zablokowane. Skontaktuj się z administratorem." << endl;
+        return;
+    }
+
+    int attempts = 3;
+    bool success = false;
+
+    while (attempts--)
+    {
+        cout << "Podaj hasło: ";
+        getline(cin, passInput);
+
+        ifstream file("users.txt");
+        if (!file.is_open())
+        {
+            cout << "Nie otworzono pliku users.txt!" << endl;
+            return;
+        }
+
+        string line;
+        while (getline(file, line))
+        {
+            size_t delimiterPos = line.find(';');
+            if (delimiterPos != string::npos)
+            {
+                string fileLogin = line.substr(0, delimiterPos);
+                string filePass = line.substr(delimiterPos + 1);
+
+                if (fileLogin == loginInput && filePass == passInput)
+                {
+                    success = true;
+                    break;
+                }
+            }
+        }
+
+        file.close();
+
+        if (success)
+        {
+            cout << "Logowanie udane!" << endl;
+            return;
+        }
+        else if (attempts > 0)
+        {
+            cout << "Nieprawidlowe dane. Pozostalo prob: " << attempts << endl;
+        }
+    }
+
+    cout << "Trzykrotnie podano nieprawidlowe dane. Konto zostalo zablokowane!" << endl;
+    blockAccount(loginInput);
+}
+
+void unblockAccount()
+{
+    string adminPass;
+    cout << "Podaj haslo administratora: ";
+    getline(cin, adminPass);
+
+    const string correctPass = "admin123"; // możesz to wczytać też z pliku, jeśli chcesz później zmieniać
+
+    if (adminPass != correctPass)
+    {
+        cout << "Błędne hasło. Dostęp zabroniony!" << endl;
+        return;
+    }
+
+    ifstream file("blocked.txt");
+    if (!file.is_open())
+    {
+        cout << "Nie mozna otworzyc pliku blocked.txt!" << endl;
+        return;
+    }
+
+    vector<string> blockedUsers;
+    string line;
+    while (getline(file, line))
+    {
+        blockedUsers.push_back(line);
+    }
+    file.close();
+
+    if (blockedUsers.empty())
+    {
+        cout << "Brak zablokowanych kont." << endl;
+        return;
+    }
+
+    cout << "Zablokowane konta:\n";
+    for (size_t i = 0; i < blockedUsers.size(); ++i)
+    {
+        cout << i + 1 << ". " << blockedUsers[i] << endl;
+    }
+
+    int choice;
+    cout << "Wybierz numer konta do odblokowania (0 aby anulować): ";
+    cin >> choice;
+    cin.ignore();
+
+    if (choice > 0 && choice <= static_cast<int>(blockedUsers.size()))
+    {
+        blockedUsers.erase(blockedUsers.begin() + choice - 1);
+
+        ofstream outFile("blocked.txt");
+        for (const auto &user : blockedUsers)
+        {
+            outFile << user << endl;
+        }
+        outFile.close();
+
+        cout << "Konto odblokowane." << endl;
     }
     else
     {
-        cout << "Login failed! Left 2 tries" << endl;
-    }
-
-    cout << "Give password: " << endl;
-    getline(cin, passInput);
-    ifstream file("pass.txt");
-    if(!file.is_open())
-    {
-        cout << "Nie otworzono pliku pass.txt! " << endl;
-        return;
-    }
-    string passFromFile;
-    bool found1 = false;
-    while(getline(file,passFromFile))
-    {
-        if(passFromFile == passInput)
-        {
-            found1 = true;
-            break;
-        }
-    }
-    file.close();
-    if(found1)
-    {
-        cout << "Login successful! " << endl;
-    }
-    else
-    {
-        cout << "Login failed! Left 2 tries" << endl;
+        cout << "Anulowano lub błędny wybór." << endl;
     }
 }
+
 int main()
 {
 
