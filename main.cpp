@@ -1,9 +1,11 @@
-    #include <iostream>
+#include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <ctime>
 #include <vector>
+#include <locale.h>
 using namespace std;
+
 
 struct User
 {
@@ -14,12 +16,12 @@ struct User
 User user;
 
 
-void saveUserCredentials(const string &login, const string &password, string role)
+void saveUserCredentials(const string &login, const string &password, const string &role)
 {
     ofstream file("users.txt", ios::app);
     if (file.is_open())
     {
-        file << login << ";" << password << endl;
+        file << login << ";" << password << ";" << role << endl;
         file.close();
     }
     else
@@ -27,6 +29,7 @@ void saveUserCredentials(const string &login, const string &password, string rol
         cout << "Nie mozna otworzyc pliku users.txt!" << endl;
     }
 }
+
 
 void loginToFile(string login)
 {
@@ -192,51 +195,32 @@ void LoginUser()
     }
 
     int attempts = 3;
-    bool success = false;
-
     while (attempts--)
     {
         cout << "Podaj hasło: ";
         getline(cin, passInput);
 
-        ifstream file("users.txt");
-        if (!file.is_open())
+        string role = getUserRole(loginInput, passInput);
+        if (!role.empty())
         {
-            cout << "Nie otworzono pliku users.txt!" << endl;
-            return;
-        }
-
-        string line;
-        while (getline(file, line))
-        {
-            size_t delimiterPos = line.find(';');
-            if (delimiterPos != string::npos)
+            cout << "Logowanie udane! Twoja rola: " << role << endl;
+            if (role == "admin")
             {
-                string fileLogin = line.substr(0, delimiterPos);
-                string filePass = line.substr(delimiterPos + 1);
-
-                if (fileLogin == loginInput && filePass == passInput)
-                {
-                    success = true;
-                    break;
-                }
+                // Możemy tu dodać menu admina
+                cout << "Masz dostęp do panelu administratora." << endl;
             }
-        }
-
-        file.close();
-
-        if (success)
-        {
-            cout << "Logowanie udane!" << endl;
+            else
+            {
+                cout << "Zalogowano jako zwykły użytkownik." << endl;
+            }
             return;
         }
-        else if (attempts > 0)
-        {
-            cout << "Nieprawidlowe dane. Pozostalo prob: " << attempts << endl;
-        }
+
+        if (attempts > 0)
+            cout << "Nieprawidłowe dane. Pozostało prób: " << attempts << endl;
     }
 
-    cout << "Trzykrotnie podano nieprawidlowe dane. Konto zostalo zablokowane!" << endl;
+    cout << "Trzykrotnie podano nieprawidłowe dane. Konto zostało zablokowane!" << endl;
     blockAccount(loginInput);
 }
 
@@ -246,7 +230,7 @@ void unblockAccount()
     cout << "Podaj haslo administratora: ";
     getline(cin, adminPass);
 
-    const string correctPass = "admin123"; // możesz to wczytać też z pliku, jeśli chcesz później zmieniać
+    const string correctPass = "admin123";
 
     if (adminPass != correctPass)
     {
@@ -305,8 +289,33 @@ void unblockAccount()
     }
 }
 
+string getUserRole(const string &loginInput, const string &passInput)
+{
+    ifstream file("users.txt");
+    if (!file.is_open())
+        return "";
+
+    string line;
+    while (getline(file, line))
+    {
+        size_t pos1 = line.find(';');
+        size_t pos2 = line.rfind(';');
+        if (pos1 != string::npos && pos2 != string::npos && pos1 != pos2)
+        {
+            string fileLogin = line.substr(0, pos1);
+            string filePass = line.substr(pos1 + 1, pos2 - pos1 - 1);
+            string role = line.substr(pos2 + 1);
+
+            if (fileLogin == loginInput && filePass == passInput)
+                return role;
+        }
+    }
+
+    return "";
+}
+
 int main()
 {
-
+    setlocale(LC_ALL, "");
     return 0;
 }
